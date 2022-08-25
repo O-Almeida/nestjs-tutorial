@@ -8,48 +8,42 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { CreateTaskDto } from './dto/create-task.dto';
 import { GetTaskFilterFDto } from './dto/gte-tasks-filter.dto';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
-import { Task } from './tasks.model';
+import { Task } from './task.entity';
 import { TasksService } from './tasks.service';
 
 @Controller('tasks')
 export class TasksController {
   constructor(private tasksService: TasksService) {}
 
-  @Get()
-  getTasks(@Query() filterDto: GetTaskFilterFDto): Task[] {
-    if (Object.keys(filterDto).length) {
-      return this.tasksService.getTasksWithFilters(filterDto);
-    } else {
-      return this.tasksService.getAllTasks();
-    }
-  }
-
   @Get('/:id')
-  getTaskById(@Param('id') id: string): Task {
+  findById(@Param('id') id: string): Promise<Task> {
     return this.tasksService.getTaskById(id);
   }
 
   @Post()
-  createTask(@Body() CreateTaskDto: CreateTaskDto): Task {
-    return this.tasksService.createTask(CreateTaskDto);
+  insert(@Body() createTaskDto: CreateTaskDto): Promise<Task> {
+    return this.tasksService.insert(createTaskDto);
+  }
+
+  @Get()
+  getTasks(@Query() filterDto: GetTaskFilterFDto): Promise<Task[]> {
+    return this.tasksService.getTasks(filterDto);
   }
 
   @Delete('/:id')
-  deleteTask(@Param('id') id: string): void {
-    return this.tasksService.deleteTask(id);
+  deleteById(@Param('id') id: string): Promise<void> {
+    return this.tasksService.deleteById(id);
   }
 
   @Patch('/:id/status')
-  updateTaskStatus(
+  updateStatusById(
     @Param('id') id: string,
-    @Body() UpdateTaskStatusDto: UpdateTaskStatusDto,
-  ): Task {
-    const { status } = UpdateTaskStatusDto;
-    return this.tasksService.updateTaskStatus(id, status);
+    @Body() updateTaskStatusDto: UpdateTaskStatusDto,
+  ): Promise<Task> {
+    return this.tasksService.updateStatusById(id, updateTaskStatusDto);
   }
 }
